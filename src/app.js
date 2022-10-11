@@ -1,5 +1,6 @@
 require('dotenv').config()
 const bodyParser = require('body-parser');
+var cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
 const userRouter = require('./routes/userRouter');
@@ -11,6 +12,8 @@ const app = express();
 mongoose.connect(process.env.MONGO_DB_CONNECTION_STRING)
 .then(() => console.log("Connected to mongo db successfully"))
 .catch(() => console.log("unable to connect to mongodb"))
+
+app.use(cors());
 
 // Parsing JSON to req.body
 app.use(bodyParser.json());

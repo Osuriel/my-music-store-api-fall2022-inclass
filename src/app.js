@@ -27,5 +27,4 @@ app.use(bodyParser.json());
 app.use(userRouter);
 
 
-
 app.listen(port, () => console.log('Music store server is listening for request'));

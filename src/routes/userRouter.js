@@ -4,7 +4,6 @@ const UserModel = require('../models/UserModel');
 
 const userRouter = express.Router();
 
-
 // Route to create user accounts
 userRouter.post('/register-user', async (req, res, next) => {
   // save the user information in the database
@@ -15,19 +14,22 @@ userRouter.post('/register-user', async (req, res, next) => {
   // HASH (Bcrypt) the password
   const hashedPassword = await bcrypt.hash(password, 10);
   
-  // store a password hash, not the password
-  const userDocument = new UserModel({
-    firstName, lastName, email, hashedPassword, profilePicture
-  });
-
-  userDocument.save();
-
-  res.send({ user: {
-    id: userDocument._id,
-    firstName, lastName, email, profilePicture,
-    isAdmin: userDocument.isAdmin,
+  try {    
+    // store a password hash, not the password
+    const userDocument = new UserModel({
+      firstName, lastName, email, hashedPassword, profilePicture: 17
+    });
+  
+    await userDocument.save();
+    
+    res.send({ user: {
+      id: userDocument._id,
+      firstName, lastName, email, profilePicture,
+      isAdmin: userDocument.isAdmin,
+    }})
+  } catch (error) {
+    next(error);
   }
-})
 
 });
 

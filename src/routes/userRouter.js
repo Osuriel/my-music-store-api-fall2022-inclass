@@ -68,8 +68,12 @@ userRouter.post('/sign-in', async (req, res, next) => {
     // The user can be successfully authenticated
     // Send user data back to client
     const token = jwt.sign({ userId: foundUser._id, iat: Date.now() }, process.env.AUTH_SECRET_KEY);
-
     
+    res.cookie('session_token', token, {
+      httpOnly: true,
+      // Should be true when using https a.k.a. in prod.
+      secure: false })
+
     res.send({ user: cleanUser(foundUser) })
 
   } catch(error){

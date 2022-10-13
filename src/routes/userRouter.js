@@ -14,7 +14,28 @@ const cleanUser = (userDocument) => {
   }
 }
 
+const getToken = (userId) => {
+  return jwt.sign({ userId, iat: Date.now() }, process.env.AUTH_SECRET_KEY);
+};
+
 const userRouter = express.Router();
+
+
+// Route to test user auth
+userRouter.get('/test-auth', async (req, res, next) => {
+
+  try {
+
+    // If the user has not logged in. return an error.
+    if(!req.user){
+      return res.status(403).send("User not logged in")
+    }
+  
+    res.send({ userFirstName: req.user.firstName });
+  } catch (error){
+    next(error);
+  }
+});
 
 // Route to create user accounts
 userRouter.post('/register-user', async (req, res, next) => {
@@ -25,14 +46,23 @@ userRouter.post('/register-user', async (req, res, next) => {
   
   // HASH (Bcrypt) the password
   const hashedPassword = await bcrypt.hash(password, 10);
+
+  
   
   try {    
     // store a password hash, not the password
     const userDocument = new UserModel({
       firstName, lastName, email, hashedPassword, profilePicture
     });
-  
+
     await userDocument.save();
+
+    const token = getToken(userDocument._id);
+    
+    res.cookie('session_token', token, {
+      httpOnly: true,
+      // Should be true when using https a.k.a. in prod.
+      secure: false })
     
     res.send({ user: cleanUser(userDocument) })
   } catch (error) {
@@ -67,7 +97,7 @@ userRouter.post('/sign-in', async (req, res, next) => {
     
     // The user can be successfully authenticated
     // Send user data back to client
-    const token = jwt.sign({ userId: foundUser._id, iat: Date.now() }, process.env.AUTH_SECRET_KEY);
+    const token = getToken(foundUser._id);
     
     res.cookie('session_token', token, {
       httpOnly: true,

@@ -20,10 +20,14 @@ const getToken = (userId) => {
 
 const userRouter = express.Router();
 
+userRouter.get('/sign-out', (req, res, next) => {
+  res.clearCookie('session_token');
+  res.send('Signed out successfully');
+})
+
 
 // Route to test user auth
 userRouter.get('/test-auth', async (req, res, next) => {
-
   try {
 
     // If the user has not logged in. return an error.
@@ -84,7 +88,7 @@ userRouter.post('/sign-in', async (req, res, next) => {
     // if the user does exist in the db
     if(!foundUser){
       // if password doesnt match tell the user credentials are not valid
-      return res.status(401).send('User not found or incorrect credentials');
+      return res.status(401).send('User not found or incorrect credentials 1');
     }
     
     // verify the password matches.
@@ -92,7 +96,7 @@ userRouter.post('/sign-in', async (req, res, next) => {
     
     if(!passwordMatch){
       // if password doesnt match tell the user credentials are not valid
-      return res.status(401).send('User not found or incorrect credentials');
+      return res.status(401).send('User not found or incorrect credentials 2');
     }
     
     // The user can be successfully authenticated

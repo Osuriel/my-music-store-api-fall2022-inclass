@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const UserModel = require('./models/UserModel');
 const userRouter = require('./routes/userRouter');
 const jwt = require('jsonwebtoken');
+const productRouter = require('./routes/productRouter');
 
 
 const port = process.env.PORT;
@@ -66,6 +67,9 @@ app.use(async (req, res, next) => {
 
 //userRoutes
 app.use(userRouter);
+
+// Product Routes
+app.use(productRouter);
 
 
 app.listen(port, () => console.log('Music store server is listening for request'));

@@ -19,6 +19,16 @@ productRouter.post('/create-product', async (req, res, next) => {
     // Grab the data from the network request
     console.log('body: ', req.body);
     const { productData } = req.body;
+
+    //if theres no user Id, then the user is obviously not logged in as an admin
+    // because theyre not logged in at all.
+    if(!req.user){
+      return res.status(401).send("User is not logged in")
+    }
+
+    if(!req.user.isAdmin){
+      return res.status(403).send("Only admins have access to this")
+    }
   
     const productDocument = new ProductModel(productData);
   
@@ -26,7 +36,7 @@ productRouter.post('/create-product', async (req, res, next) => {
     await productDocument.save();
   
     // return it to the front end after.
-    res.send({ product: productDocument })
+    res.send({ product: cleanProduct(productDocument) })
   } catch(error){
     next(error);
   }

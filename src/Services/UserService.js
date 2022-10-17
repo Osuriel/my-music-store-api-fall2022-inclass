@@ -25,7 +25,7 @@ const signOut = async (req, res, next) => {
 };
 
 // Route to create user accounts
-const registerUser = ()  => async (req, res, next) => {
+const registerUser = async (req, res, next) => {
   // save the user information in the database
   
   // get credentials and user info from the front end

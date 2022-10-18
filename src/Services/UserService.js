@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const UserModel = require('../models/UserModel');
 const jwt = require('jsonwebtoken');
+const PermissionService = require('./PermissionService');
 
 const cleanUser = (userDocument) => {
   return {
@@ -11,6 +12,7 @@ const cleanUser = (userDocument) => {
     email: userDocument.email,
     profilePicture: userDocument.profilePicture,
     isAdmin: userDocument.isAdmin,
+    favorites: userDocument.favorites,
   }
 }
 
@@ -99,10 +101,51 @@ const signIn = async (req, res, next) => {
     // Provide a way for the user to not have to enter their password again in future request
 }
 
+
+const updateFavorites = async (req, res, next) => {
+  try{
+    PermissionService.verifyUserLoggedIn(req, res);
+
+    const { productId } = req.body;
+
+    // if the poduct is already in the favorites, remove it
+    if(req.user.favorites.includes(productId)){
+      // Remove that particular product from the user favorites
+      req.user.favorites.pull(productId);
+      await req.user.save();
+      return  res.send({ user: cleanUser(req.user), action: 'removed' })
+    }
+    
+    req.user.favorites.push(productId);
+
+    await req.user.save()
+
+    res.send({ user: cleanUser(req.user), action: 'added' })
+
+  } catch (error){
+    next(error);
+  }
+};
+
+const getUserFavorites = async (req, res, next) => {
+  try{
+    PermissionService.verifyUserLoggedIn(req, res);
+    await req.user.populate('favorites');
+  
+    console.log('req.user: ', req.user)
+  
+    res.send({ userFavorites: req.user.favorites });
+  } catch(error){
+    next(error)
+  }
+};
+
 const UserService = {
   signIn,
   signOut,
   registerUser,
+  updateFavorites,
+  getUserFavorites,
 }
 
 module.exports = UserService;
